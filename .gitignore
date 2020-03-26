@@ -1,3 +1,5 @@
 py/.idea/
 
 py/utils/__pycache__/
+
+py/data/
