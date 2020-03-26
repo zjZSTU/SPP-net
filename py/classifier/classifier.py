@@ -133,5 +133,5 @@ if __name__ == '__main__':
     best_model = train_model(model, criterion, optimizer, lr_scheduler, data_sizes, data_loaders, num_epochs=25,
                              device=device)
     # 保存最好的模型参数
-    util.check_dir('./data/models')
-    torch.save(best_model.state_dict(), './data/models/alexnet_car.pth')
+    util.check_dir('../data/models')
+    torch.save(best_model.state_dict(), '../data/models/alexnet_car.pth')
