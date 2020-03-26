@@ -17,14 +17,16 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 import torchvision
-from torch.hub import load_state_dict_from_url
 
-import models.alexnet as alexnet
+import models.zfnet as zfnet
 import utils.util as util
 
 model_urls = {
     'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
 }
+
+data_root_dir = '../data/train_val/'
+model_dir = '../data/models/'
 
 
 def load_data(root_dir):
@@ -119,19 +121,26 @@ def train_model(model, criterion, optimizer, scheduler, dataset_sizes, dataloade
 
 
 if __name__ == '__main__':
-    data_loaders, data_sizes = load_data('../data/train_val/')
+    data_loaders, data_sizes = load_data(data_root_dir)
+    print(data_sizes)
 
-    model = alexnet.AlexNet(num_classes=20)
-    # 切换到GPU
-    device = util.get_device()
-    model = model.to(device)
+    for name in ['alexnet', 'zfnet']:
+        if name == 'alexnet':
+            model = torchvision.models.AlexNet(num_classes=20)
+        else:
+            model = zfnet.ZFNet(num_classes=20)
+        device = util.get_device()
+        model = model.to(device)
 
-    criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
-    lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+        lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
 
-    best_model = train_model(model, criterion, optimizer, lr_scheduler, data_sizes, data_loaders, num_epochs=25,
-                             device=device)
-    # 保存最好的模型参数
-    util.check_dir('../data/models')
-    torch.save(best_model.state_dict(), '../data/models/alexnet_car.pth')
+        best_model = train_model(model, criterion, optimizer, lr_scheduler, data_sizes, data_loaders, num_epochs=25,
+                                 device=device)
+        # 保存最好的模型参数
+        util.check_dir(model_dir)
+        torch.save(best_model.state_dict(), os.path.join(model_dir, '%s.pth' % name))
+
+        print('train %s done' % name)
+        print()
