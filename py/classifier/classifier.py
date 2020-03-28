@@ -133,10 +133,11 @@ if __name__ == '__main__':
         model = model.to(device)
 
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
-        lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+        # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+        optimizer = optim.Adam(model.parameters(), lr=1e-3)
+        lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
-        best_model = train_model(model, criterion, optimizer, lr_scheduler, data_sizes, data_loaders, num_epochs=25,
+        best_model = train_model(model, criterion, optimizer, lr_scheduler, data_sizes, data_loaders, num_epochs=50,
                                  device=device)
         # 保存最好的模型参数
         util.check_dir(model_dir)
