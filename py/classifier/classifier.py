@@ -33,13 +33,6 @@ def load_data(root_dir):
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
-    transform2 = transforms.Compose([
-        transforms.Resize((180, 180)),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-
     data_loaders = {}
     dataset_sizes = {}
     for phase in ['train', 'val']:
@@ -50,18 +43,11 @@ def load_data(root_dir):
 
         data_loaders[phase] = data_loader
         dataset_sizes[phase] = len(data_set)
-        # 额外加载
-        data_set = ImageFolder(phase_dir, transform=transform2)
-        data_loader = DataLoader(data_set, batch_size=128, shuffle=True, num_workers=8)
-
-        data_loaders['%s_spp' % phase] = data_loader
-        dataset_sizes['%s_spp' % phase] = len(data_set)
 
     return data_loaders, dataset_sizes
 
 
-def train_model(model, criterion, optimizer, scheduler, dataset_sizes, data_loaders, num_epochs=25, device=None,
-                is_spp=False):
+def train_model(model, criterion, optimizer, scheduler, dataset_sizes, data_loaders, num_epochs=25, device=None):
     since = time.time()
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -83,16 +69,8 @@ def train_model(model, criterion, optimizer, scheduler, dataset_sizes, data_load
             running_loss = 0.0
             running_corrects = 0
 
-            if is_spp:
-                if epoch % 2 == 0:
-                    dataloader = data_loaders[phase]
-                else:
-                    dataloader = data_loaders['%s_spp' % phase]
-            else:
-                dataloader = data_loaders[phase]
-
             # Iterate over data.
-            for inputs, labels in dataloader:
+            for inputs, labels in data_loaders[phase]:
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
@@ -117,13 +95,7 @@ def train_model(model, criterion, optimizer, scheduler, dataset_sizes, data_load
             if phase == 'train':
                 scheduler.step()
 
-            if is_spp:
-                if epoch % 2 == 0:
-                    dataset_size = dataset_sizes[phase]
-                else:
-                    dataset_size = dataset_sizes['%s_spp' % phase]
-            else:
-                dataset_size = dataset_sizes[phase]
+            dataset_size = dataset_sizes[phase]
 
             epoch_loss = running_loss / dataset_size
             epoch_acc = running_corrects.double() / dataset_size
@@ -164,7 +136,8 @@ if __name__ == '__main__':
         else:
             model = alexnet_spp.alexnet_spp(num_classes=20)
 
-        device = util.get_device()
+        # device = util.get_device()
+        device = 'cpu'
         model = model.to(device)
 
         criterion = nn.CrossEntropyLoss()
@@ -174,7 +147,7 @@ if __name__ == '__main__':
 
         best_model, loss_dict, acc_dict = train_model(model, criterion, optimizer, lr_scheduler, data_sizes,
                                                       data_loaders, num_epochs=50,
-                                                      device=device, is_spp=(name == 'alexnet_spp'))
+                                                      device=device)
 
         # 保存最好的模型参数
         util.check_dir(model_dir)
