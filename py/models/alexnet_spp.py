@@ -33,12 +33,11 @@ class AlexNet_SPP(nn.Module):
             nn.ReLU(inplace=True),
             # nn.MaxPool2d(kernel_size=3, stride=2),
         )
-        # 默认使用3级金字塔，其向量长度为21
-        self.spp = SpatialPyramidPooling()
+        self.spp = SpatialPyramidPooling(num_pools=(1, 4, 9, 36), mode='max')
         # self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
         self.classifier = nn.Sequential(
             nn.Dropout(),
-            nn.Linear(256 * 21, 4096),
+            nn.Linear(256 * 50, 4096),
             nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(4096, 4096),
