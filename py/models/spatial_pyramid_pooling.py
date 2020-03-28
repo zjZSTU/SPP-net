@@ -23,6 +23,7 @@ class SpatialPyramidPooling(nn.Module):
     :param str mode: Specifies the type of pooling, either max or avg
     """
 
+    # 默认使用3级金字塔，其向量长度为21
     def __init__(self, num_pools=(1, 4, 16), mode='max'):
         super(SpatialPyramidPooling, self).__init__()
         self.name = 'SpatialPyramidPooling'
