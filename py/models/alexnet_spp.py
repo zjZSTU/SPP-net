@@ -91,6 +91,15 @@ def test():
     print(output.size())
 
 
-if __name__ == '__main__':
+def test2():
     model = alexnet_spp(num_classes=20)
     print(model)
+
+
+if __name__ == '__main__':
+    model = AlexNet_SPP(num_classes=20)
+    print(model)
+
+    input = torch.randn((128, 3, 180, 180))
+    output = model.forward(input)
+    print(output.size())
