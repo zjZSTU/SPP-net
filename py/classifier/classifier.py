@@ -128,8 +128,8 @@ if __name__ == '__main__':
     data_loaders, data_sizes = load_data(data_root_dir)
     print(data_sizes)
 
-    loss_dict = dict()
-    acc_dict = dict()
+    res_loss = dict()
+    res_acc = dict()
     for name in ['alexnet', 'zfnet']:
         if name == 'alexnet':
             model = torchvision.models.AlexNet(num_classes=20)
@@ -150,11 +150,11 @@ if __name__ == '__main__':
         util.check_dir(model_dir)
         torch.save(best_model.state_dict(), os.path.join(model_dir, '%s.pth' % name))
 
-        loss_dict[name] = loss_dict
-        acc_dict[name] = acc_dict
+        res_loss[name] = loss_dict
+        res_acc[name] = acc_dict
 
         print('train %s done' % name)
         print()
 
-    util.save_png('loss', loss_dict)
-    util.save_png('acc', acc_dict)
+    util.save_png('loss', res_loss)
+    util.save_png('acc', res_acc)
