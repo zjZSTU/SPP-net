@@ -66,7 +66,7 @@ def save_png(title, res_dict):
     # ax = plt.gca()
     # ax.xaxis.set_major_locator(x_major_locator)
     fig = plt.figure()
-    
+
     plt.title(title)
     for name, res in res_dict.items():
         for k, v in res.items():

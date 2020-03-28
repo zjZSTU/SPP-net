@@ -21,10 +21,6 @@ import torchvision
 import models.zfnet as zfnet
 import utils.util as util
 
-model_urls = {
-    'alexnet': 'https://download.pytorch.org/models/alexnet-owt-4df8aa71.pth',
-}
-
 data_root_dir = '../data/train_val/'
 model_dir = '../data/models/'
 
@@ -132,9 +128,13 @@ if __name__ == '__main__':
     res_acc = dict()
     for name in ['alexnet', 'zfnet']:
         if name == 'alexnet':
-            model = torchvision.models.AlexNet(num_classes=20)
+            model = torchvision.models.alexnet(pretrained=True, progress=True)
+            num_features = model.classifier[6].in_features
+            model.classifier[6] = nn.Linear(num_features, 20)
         else:
-            model = zfnet.ZFNet(num_classes=20)
+            # model = zfnet.ZFNet(num_classes=20)
+            model = zfnet.zfnet(num_classes=20)
+
         device = util.get_device()
         model = model.to(device)
 
