@@ -18,7 +18,7 @@ import torchvision.transforms as transforms
 from torchvision.datasets import ImageFolder
 import torchvision
 
-import models.zfnet as zfnet
+import models.alexnet_spp as alexnet_spp
 import utils.util as util
 
 data_root_dir = '../data/train_val/'
@@ -126,14 +126,13 @@ if __name__ == '__main__':
 
     res_loss = dict()
     res_acc = dict()
-    for name in ['alexnet', 'zfnet']:
-        if name == 'alexnet':
+    for name in ['alexnet', 'alexnet_spp']:
+        if name == 'alexnet_spp':
             model = torchvision.models.alexnet(pretrained=True, progress=True)
             num_features = model.classifier[6].in_features
             model.classifier[6] = nn.Linear(num_features, 20)
         else:
-            # model = zfnet.ZFNet(num_classes=20)
-            model = zfnet.zfnet(num_classes=20)
+            model = alexnet_spp.alexnet_spp(num_classes=20)
 
         device = util.get_device()
         model = model.to(device)
