@@ -54,7 +54,7 @@ def load_data(root_dir):
         data_set = ImageFolder(phase_dir, transform=transform2)
         data_loader = DataLoader(data_set, batch_size=128, shuffle=True, num_workers=8)
 
-        data_loader['%s_spp' % phase] = data_loader
+        data_loaders['%s_spp' % phase] = data_loader
         dataset_sizes['%s_spp' % phase] = len(data_set)
 
     return data_loaders, dataset_sizes
