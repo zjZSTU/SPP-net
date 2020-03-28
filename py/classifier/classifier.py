@@ -57,6 +57,8 @@ def train_model(model, criterion, optimizer, scheduler, dataset_sizes, dataloade
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
+    loss_dict = {'train': [], 'val': []}
+    acc_dict = {'train': [], 'val': []}
     for epoch in range(num_epochs):
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
         print('-' * 10)
@@ -99,6 +101,8 @@ def train_model(model, criterion, optimizer, scheduler, dataset_sizes, dataloade
 
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.double() / dataset_sizes[phase]
+            loss_dict[phase].append(epoch_loss)
+            acc_dict[phase].append(epoch_acc)
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
@@ -117,13 +121,15 @@ def train_model(model, criterion, optimizer, scheduler, dataset_sizes, dataloade
 
     # load best model weights
     model.load_state_dict(best_model_wts)
-    return model
+    return model, loss_dict, acc_dict
 
 
 if __name__ == '__main__':
     data_loaders, data_sizes = load_data(data_root_dir)
     print(data_sizes)
 
+    loss_dict = dict()
+    acc_dict = dict()
     for name in ['alexnet', 'zfnet']:
         if name == 'alexnet':
             model = torchvision.models.AlexNet(num_classes=20)
@@ -135,13 +141,20 @@ if __name__ == '__main__':
         criterion = nn.CrossEntropyLoss()
         # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
         optimizer = optim.Adam(model.parameters(), lr=1e-3)
-        lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
+        lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 
-        best_model = train_model(model, criterion, optimizer, lr_scheduler, data_sizes, data_loaders, num_epochs=50,
-                                 device=device)
+        best_model, loss_dict, acc_dict = train_model(model, criterion, optimizer, lr_scheduler, data_sizes,
+                                                      data_loaders, num_epochs=50,
+                                                      device=device)
         # 保存最好的模型参数
         util.check_dir(model_dir)
         torch.save(best_model.state_dict(), os.path.join(model_dir, '%s.pth' % name))
 
+        loss_dict[name] = loss_dict
+        acc_dict[name] = acc_dict
+
         print('train %s done' % name)
         print()
+
+    util.save_png('loss', loss_dict)
+    util.save_png('acc', acc_dict)
