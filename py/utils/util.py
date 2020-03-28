@@ -62,9 +62,9 @@ def parse_xml(xml_path):
 
 
 def save_png(title, res_dict):
-    x_major_locator = MultipleLocator(1)
-    ax = plt.gca()
-    ax.xaxis.set_major_locator(x_major_locator)
+    # x_major_locator = MultipleLocator(1)
+    # ax = plt.gca()
+    # ax.xaxis.set_major_locator(x_major_locator)
 
     plt.title(title)
     for name, res in res_dict.items():
