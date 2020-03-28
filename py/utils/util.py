@@ -11,6 +11,9 @@ import os
 import numpy as np
 import xmltodict
 import torch
+import random
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import MultipleLocator
 
 
 def get_device():
@@ -56,3 +59,48 @@ def parse_xml(xml_path):
             pass
 
         return np.array(bndboxs)
+
+
+def save_png(title, res_dict):
+    x_major_locator = MultipleLocator(1)
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(x_major_locator)
+
+    plt.title(title)
+    for name, res in res_dict.items():
+        for k, v in res.items():
+            x = list(range(len(v)))
+            plt.plot(v, label='%s-%s' % (name, k))
+
+    plt.legend()
+    plt.savefig('%s.png' % title)
+
+
+def show():
+    x = list(range(10))
+    y = random.sample(list(range(100)), 10)
+
+    plt.figure(1, figsize=(9, 3))
+
+    plt.title('test')
+    plt.subplot(1, 2, 1)
+    plt.plot(x, y, label='unset')
+    plt.legend()
+
+    plt.subplot(122)
+
+    x_major_locator = MultipleLocator(1)
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(x_major_locator)
+
+    plt.plot(x, y, label='set')
+    plt.legend()
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    # res_dict = {'alexnet': {'train': [1, 2, 3], 'val': [2, 3, 5]}, 'zfnet': {'train': [5, 5, 6], 'val': [2, 6, 7]}}
+    # save_png('loss', res_dict)
+
+    show()
