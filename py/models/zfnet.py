@@ -10,8 +10,6 @@
 import torch
 import torch.nn as nn
 
-from torchvision.models import alexnet
-
 
 class ZFNet(nn.Module):
 
@@ -51,46 +49,13 @@ class ZFNet(nn.Module):
         return x
 
 
-def zfnet(num_classes=20):
-    model = ZFNet(num_classes=num_classes)
-    model_alexnet = alexnet(pretrained=True, progress=True)
-
-    pretrained_dict = model_alexnet.state_dict()
-    model_dict = model.state_dict()
-
-    res_dict = dict()
-    for item in zip(pretrained_dict.items(), model_dict.items()):
-        pretrained_dict_item, model_dict_item = item
-
-        k1, v1 = pretrained_dict_item
-        k2, v2 = model_dict_item
-        # print(v1.shape, v2.shape)
-
-        if k1 == k2 and v1.shape == v2.shape:
-            res_dict[k2] = v1
-        else:
-            res_dict[k2] = v2
-
-    model_dict.update(res_dict)
-    model.load_state_dict(model_dict)
-
-    return model
-
-
 if __name__ == '__main__':
-    # # model = ZFNet(num_classes=20)
-    # model = zfnet(num_classes=20)
-    # print(model)
-    #
-    # input = torch.randn((128, 3, 227, 227))
-    # output = model.forward(input)
-    # print(output.size())
+    model = ZFNet(num_classes=20)
+    print(model)
 
-    model = alexnet()
-    print(model)
-    num_features = model.classifier[6].in_features
-    model.classifier[6] = nn.Linear(num_features, 20)
-    print(model)
+    input = torch.randn((128, 3, 227, 227))
+    output = model.forward(input)
+    print(output.size())
 
     # model_dict = model.state_dict()
     # for k, v in model_dict.items():
