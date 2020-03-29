@@ -128,19 +128,17 @@ if __name__ == '__main__':
 
     res_loss = dict()
     res_acc = dict()
-    for name in ['alexnet_spp', 'spp_pretrained']:
+    for name in ['alexnet_spp', 'alexnet']:
         if name == 'alexnet_spp':
             model = alexnet_spp.AlexNet_SPP(num_classes=20)
-            optimizer = optim.Adam(model.parameters(), lr=1e-3)
         else:
-            model = alexnet_spp.alexnet_spp(num_classes=20)
-            optimizer = optim.Adam(model.parameters(), lr=1e-4)
+            model = torchvision.models.AlexNet(num_classes=20)
 
         device = util.get_device()
         model = model.to(device)
 
         criterion = nn.CrossEntropyLoss()
-
+        optimizer = optim.Adam(model.parameters(), lr=1e-3)
         lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 
         best_model, loss_dict, acc_dict = train_model(model, criterion, optimizer, lr_scheduler, data_sizes,
