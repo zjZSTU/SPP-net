@@ -128,26 +128,23 @@ if __name__ == '__main__':
 
     res_loss = dict()
     res_acc = dict()
-    for name in ['alexnet', 'alexnet_spp']:
+    for name in ['alexnet_spp', 'spp_pretrained']:
         if name == 'alexnet_spp':
-            model = torchvision.models.alexnet(pretrained=True, progress=True)
-            num_features = model.classifier[6].in_features
-            model.classifier[6] = nn.Linear(num_features, 20)
+            model = alexnet_spp.AlexNet_SPP(num_classes=20)
+            optimizer = optim.Adam(model.parameters(), lr=1e-3)
         else:
             model = alexnet_spp.alexnet_spp(num_classes=20)
+            optimizer = optim.Adam(model.parameters(), lr=1e-4)
 
-        # device = util.get_device()
-        device = 'cpu'
+        device = util.get_device()
         model = model.to(device)
 
         criterion = nn.CrossEntropyLoss()
-        # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
-        optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
         lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 
         best_model, loss_dict, acc_dict = train_model(model, criterion, optimizer, lr_scheduler, data_sizes,
-                                                      data_loaders, num_epochs=50,
-                                                      device=device)
+                                                      data_loaders, num_epochs=50, device=device)
 
         # 保存最好的模型参数
         util.check_dir(model_dir)
