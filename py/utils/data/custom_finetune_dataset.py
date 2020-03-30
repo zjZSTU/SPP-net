@@ -19,7 +19,7 @@ import utils.util as util
 
 class CustomFinetuneDataset(Dataset):
 
-    def __init__(self, root_dir, transform, model, device, s):
+    def __init__(self, root_dir, transform, model, s):
         """
         加载所有的图像以及正负样本边界框
         """
@@ -89,7 +89,7 @@ class CustomFinetuneDataset(Dataset):
             # 图像处理
             img = transform(img)
             # 添加一维
-            img = img.unsqueeze(0).to(device)
+            img = img.unsqueeze(0)
             # 获取特征图
             feature_map = model.feature_map(img)
             # 降维
@@ -99,7 +99,6 @@ class CustomFinetuneDataset(Dataset):
         self.feature_map_list = feature_map_list
         self.model = model
         self.transform = transform
-        self.device = device
         self.s = s
 
     def __getitem__(self, index: int):
@@ -134,8 +133,6 @@ class CustomFinetuneDataset(Dataset):
         xmax = int(np.floor(xmax * ratio / S))
         ymax = int(np.floor(ymax * ratio / S))
 
-        # transform_img = self.transform(src_image).unsqueeze(0).to(self.device)
-        # feature_map = self.model.feature_map(transform_img).squeeze(0)
         feature_map = self.feature_map_list[image_id]
         image = feature_map[:, ymin:ymax, xmin:xmax]
 
@@ -173,9 +170,8 @@ if __name__ == '__main__':
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     model = alexnet_spp.AlexNet_SPP(num_classes=20)
-    device = 'cpu'
 
-    data_set = CustomFinetuneDataset(root_dir, transform, model, device, s)
+    data_set = CustomFinetuneDataset(root_dir, transform, model, s)
 
     image, target, cache_dict = data_set.__getitem__(0)
     print(image.shape)
