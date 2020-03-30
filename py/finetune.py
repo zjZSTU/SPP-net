@@ -23,7 +23,7 @@ from utils.data.custom_batch_sampler import CustomBatchSampler
 from utils.util import check_dir
 
 
-def load_data(data_root_dir, model, device, s=688):
+def load_data(data_root_dir, model, s=688):
     transform = transforms.Compose([
         transforms.ToPILImage(),
         transforms.Resize(s),
@@ -36,7 +36,7 @@ def load_data(data_root_dir, model, device, s=688):
     data_sizes = {}
     for name in ['train', 'val']:
         data_dir = os.path.join(data_root_dir, name)
-        data_set = CustomFinetuneDataset(data_dir, transform, model, device, s)
+        data_set = CustomFinetuneDataset(data_dir, transform, model, s)
         data_sampler = CustomBatchSampler(data_set.get_positive_num(), data_set.get_negative_num(), 32, 96)
         data_loader = DataLoader(data_set, batch_size=128, sampler=data_sampler, num_workers=8, drop_last=True)
 
@@ -116,12 +116,11 @@ def train_model(data_loaders, model, criterion, optimizer, lr_scheduler, num_epo
 
 
 if __name__ == '__main__':
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    device = "cpu"
+    data_loaders, data_sizes = load_data('./data/finetune_car', alexnet_spp.alexnet_spp(num_classes=2), s=688)
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = alexnet_spp.alexnet_spp(num_classes=2)
     model = model.to(device)
-
-    data_loaders, data_sizes = load_data('./data/finetune_car', model, device, s=688)
 
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
@@ -130,5 +129,5 @@ if __name__ == '__main__':
 
     best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=50)
     # 保存最好的模型参数
-    check_dir('./models')
-    torch.save(best_model.state_dict(), 'models/alexnet_car.pth')
+    check_dir('./data/models/')
+    torch.save(best_model.state_dict(), './data/models/alexnet_spp_car.pth')
