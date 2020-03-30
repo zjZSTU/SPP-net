@@ -130,7 +130,7 @@ def test4():
     print(res.shape)
 
 
-if __name__ == '__main__':
+def test5():
     model = alexnet_spp(num_classes=2)
 
     model_dict = model.state_dict()
@@ -148,3 +148,12 @@ if __name__ == '__main__':
         print(param.requires_grad)
 
     print('# Model parameters:', sum(param.numel() for param in model.parameters()))
+
+
+if __name__ == '__main__':
+    model = AlexNet_SPP(num_classes=20)
+
+    for k, v in model.named_parameters():
+        print(k, v.requires_grad)
+        if 'classifier' not in k:
+            v.requires_grad = False
