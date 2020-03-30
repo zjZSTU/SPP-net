@@ -93,7 +93,7 @@ class CustomFinetuneDataset(Dataset):
             # 获取特征图
             feature_map = model.feature_map(img)
             # 降维
-            feature_map = feature_map.squeeze(0)
+            # feature_map = feature_map.squeeze(0)
             feature_map_list.append(feature_map)
 
         self.feature_map_list = feature_map_list
@@ -134,7 +134,8 @@ class CustomFinetuneDataset(Dataset):
         ymax = int(np.floor(ymax * ratio / S))
 
         feature_map = self.feature_map_list[image_id]
-        image = feature_map[:, ymin:ymax, xmin:xmax]
+        image = feature_map[:, :, ymin:ymax, xmin:xmax]
+        image = self.model.spp(image).squeeze(0)
 
         return image, target, cache_dict
 
