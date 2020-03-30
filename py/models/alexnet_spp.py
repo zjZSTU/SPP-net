@@ -61,7 +61,6 @@ class AlexNet_SPP(nn.Module):
         return self.features(x)
 
     def classify(self, x):
-        x = self.spp(x)
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
