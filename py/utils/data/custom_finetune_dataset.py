@@ -128,12 +128,23 @@ class CustomFinetuneDataset(Dataset):
         ratio = self.scale(h, w, self.s)
         S = self.model.get_S()
 
-        xmin = int(np.ceil(xmin * ratio / S))
-        ymin = int(np.ceil(ymin * ratio / S))
-        xmax = int(np.floor(xmax * ratio / S))
-        ymax = int(np.floor(ymax * ratio / S))
+        xmin = int(np.floor(xmin * ratio / S))
+        ymin = int(np.floor(ymin * ratio / S))
+        xmax = int(np.ceil(xmax * ratio / S))
+        ymax = int(np.ceil(ymax * ratio / S))
 
         feature_map = self.feature_map_list[image_id]
+        h, w = feature_map.shape[2:4]
+
+        if xmin < 0:
+            xmin = 0
+        if ymin < 0:
+            ymin = 0
+        if xmax > w:
+            xmax = w
+        if ymax > h:
+            ymax = h
+
         image = feature_map[:, :, ymin:ymax, xmin:xmax]
         image = self.model.spp(image).squeeze(0)
 
