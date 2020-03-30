@@ -38,7 +38,7 @@ def load_data(data_root_dir, model, s=688):
         data_dir = os.path.join(data_root_dir, name)
         data_set = CustomFinetuneDataset(data_dir, transform, model, s)
         data_sampler = CustomBatchSampler(data_set.get_positive_num(), data_set.get_negative_num(), 32, 96)
-        data_loader = DataLoader(data_set, batch_size=128, sampler=data_sampler, num_workers=8, drop_last=True)
+        data_loader = DataLoader(data_set, batch_size=128, sampler=data_sampler, num_workers=0, drop_last=True)
 
         data_loaders[name] = data_loader
         data_sizes[name] = data_sampler.__len__()
