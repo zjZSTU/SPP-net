@@ -103,6 +103,9 @@ def train_model(data_loaders, model, criterion, optimizer, lr_scheduler, num_epo
                 best_acc = epoch_acc
                 best_model_weights = copy.deepcopy(model.state_dict())
 
+        # 每轮迭代后保存模型
+        torch.save(best_model.state_dict(), './data/models/alexnet_spp_car_%d.pth' % epoch)
+
         print()
 
     time_elapsed = time.time() - since
