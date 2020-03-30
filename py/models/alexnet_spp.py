@@ -53,6 +53,18 @@ class AlexNet_SPP(nn.Module):
         x = self.classifier(x)
         return x
 
+    def feature_map(self, x):
+        return self.features(x)
+
+    def classify(self, x):
+        x = self.spp(x)
+        x = torch.flatten(x, 1)
+        x = self.classifier(x)
+        return x
+
+    def get_S(self):
+        return 16
+
 
 def alexnet_spp(num_classes=20):
     model = AlexNet_SPP(num_classes=num_classes)
@@ -95,10 +107,21 @@ def test2():
     print(model)
 
 
-if __name__ == '__main__':
+def test3():
     model = AlexNet_SPP(num_classes=20)
     print(model)
 
     input = torch.randn((128, 3, 180, 180))
     output = model.forward(input)
     print(output.size())
+
+
+if __name__ == '__main__':
+    model = AlexNet_SPP(num_classes=21)
+
+    input = torch.randn((1, 3, 668, 668))
+    features = model.feature_map(input)
+    print(features.shape)
+
+    res = model.classify(features)
+    print(res.shape)
