@@ -19,10 +19,9 @@ import utils.util as util
 
 class CustomFinetuneDataset(Dataset):
 
-    def __init__(self, root_dir, transform, model, s):
+    def __init__(self, root_dir, transform, model, device, s):
         """
-        首先加载所有的图像以及正负样本边界框
-        同时保存所有图像的特征图
+        加载所有的图像以及正负样本边界框
         """
         samples = util.parse_car_csv(root_dir)
 
@@ -83,22 +82,24 @@ class CustomFinetuneDataset(Dataset):
         self.positive_list = positive_list
         self.negative_list = negative_list
 
-        # 保存所有图片的特征图会导致CPU内存不足
+        # 保存所有图片的特征图有可能会导致内存不足
         # 提取所有图片的特征图
-        # feature_map_list = list()
-        # for img in jpeg_images:
-        #     # 图像处理
-        #     img = transform(img)
-        #     # 添加一维
-        #     img = img.unsqueeze(0)
-        #     # 获取特征图
-        #     feature_map = model.feature_map(img)
-        #     # 降维
-        #     feature_map = feature_map.squeeze(0)
-        #     feature_map_list.append(feature_map)
+        feature_map_list = list()
+        for img in jpeg_images:
+            # 图像处理
+            img = transform(img)
+            # 添加一维
+            img = img.unsqueeze(0).to(device)
+            # 获取特征图
+            feature_map = model.feature_map(img)
+            # 降维
+            feature_map = feature_map.squeeze(0)
+            feature_map_list.append(feature_map)
 
+        self.feature_map_list = feature_map_list
         self.model = model
         self.transform = transform
+        self.device = device
         self.s = s
 
     def __getitem__(self, index: int):
@@ -133,14 +134,21 @@ class CustomFinetuneDataset(Dataset):
         xmax = int(np.floor(xmax * ratio / S))
         ymax = int(np.floor(ymax * ratio / S))
 
-        transform_img = self.transform(src_image).unsqueeze(0)
-        feature_map = self.model.feature_map(transform_img).squeeze(0)
+        # transform_img = self.transform(src_image).unsqueeze(0).to(self.device)
+        # feature_map = self.model.feature_map(transform_img).squeeze(0)
+        feature_map = self.feature_map_list[image_id]
         image = feature_map[:, ymin:ymax, xmin:xmax]
 
         return image, target, cache_dict
 
     def __len__(self) -> int:
         return len(self.positive_list) + len(self.negative_list)
+
+    def get_positive_num(self):
+        return len(self.positive_list)
+
+    def get_negative_num(self):
+        return len(self.negative_list)
 
     def scale(self, h, w, s):
         """
@@ -165,8 +173,9 @@ if __name__ == '__main__':
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
     model = alexnet_spp.AlexNet_SPP(num_classes=20)
+    device = 'cpu'
 
-    data_set = CustomFinetuneDataset(root_dir, transform, model, s)
+    data_set = CustomFinetuneDataset(root_dir, transform, model, device, s)
 
     image, target, cache_dict = data_set.__getitem__(0)
     print(image.shape)
