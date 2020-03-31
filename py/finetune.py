@@ -29,7 +29,8 @@ def load_data(data_root_dir, model, s=688):
         transforms.Resize(s),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
     ])
 
     data_loaders = {}
@@ -127,10 +128,10 @@ if __name__ == '__main__':
 
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4, weight_decay=1e-4)
-    lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
+    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-3, weight_decay=1e-2)
+    lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=4, gamma=0.1)
 
-    best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=50)
+    best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=15)
     # 保存最好的模型参数
     check_dir('./data/models/')
     torch.save(best_model.state_dict(), './data/models/alexnet_spp_car.pth')
