@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     criterion = nn.CrossEntropyLoss()
     # optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
-    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
+    optimizer = optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4, weight_decay=1e-4)
     lr_scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
 
     best_model = train_model(data_loaders, model, criterion, optimizer, lr_scheduler, device=device, num_epochs=50)
