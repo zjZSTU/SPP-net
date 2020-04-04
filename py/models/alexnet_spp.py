@@ -33,12 +33,8 @@ class AlexNet_SPP(nn.Module):
             nn.ReLU(inplace=True),
             # nn.MaxPool2d(kernel_size=3, stride=2),
         )
-        self.spp = SpatialPyramidPooling(num_pools=(1, 4, 9, 36), mode='max')
         # self.avgpool = nn.AdaptiveAvgPool2d((6, 6))
-        # 只训练分类器
-        for p in self.parameters():
-            p.requires_grad = False
-
+        self.spp = SpatialPyramidPooling(num_pools=(1, 4, 9, 36), mode='max')
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(256 * 50, 4096),
@@ -64,9 +60,6 @@ class AlexNet_SPP(nn.Module):
         x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
-
-    def get_S(self):
-        return 16
 
 
 def alexnet_spp(num_classes=20):
@@ -137,11 +130,11 @@ def test5():
     for item in model_dict.items():
         k, v = item
         print(k, v.requires_grad)
-        if 'classifier' not in k:
+        if 'classify' not in k:
             v.requires_grad = False
 
     for k, v in model.named_parameters():
-        if 'classifier' not in k:
+        if 'classify' not in k:
             v.requires_grad = False  # 固定参数
 
     for param in model.parameters():
@@ -151,9 +144,4 @@ def test5():
 
 
 if __name__ == '__main__':
-    model = AlexNet_SPP(num_classes=20)
-
-    for k, v in model.named_parameters():
-        print(k, v.requires_grad)
-        if 'classifier' not in k:
-            v.requires_grad = False
+    test4()
