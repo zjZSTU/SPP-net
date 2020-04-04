@@ -30,3 +30,6 @@ extra_javascript:
 # 导航
 nav:
     - Home: index.md
+    - 图像分类: './图像分类.md'
+    - 目标检测:
+        - '训练流程': './目标检测训练流程.md'
