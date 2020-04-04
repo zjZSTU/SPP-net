@@ -5,3 +5,5 @@ py/utils/__pycache__/
 py/data/
 
 py/models/__pycache__/
+
+py/__pycache__/
