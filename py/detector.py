@@ -47,8 +47,8 @@ def get_model(device=None):
     return model
 
 
-def compute_project_window(src_rect, S=16):
-    xmin, ymin, xmax, ymax = src_rect
+def compute_project_window(src_rect, ratio, S=16):
+    xmin, ymin, xmax, ymax = src_rect * ratio
 
     xmin = int(np.floor(xmin / S) + 1)
     ymin = int(np.floor(ymin / S) + 1)
@@ -121,10 +121,9 @@ def draw_box_with_text(img, rect_list, score_list):
 
 
 if __name__ == '__main__':
-    start = time.time()
-
+    s = 688
     device = util.get_device()
-    transform = get_transform()
+    transform = get_transform(s=s)
     model = get_model(device=device)
 
     # 创建selectivesearch对象
@@ -137,17 +136,18 @@ if __name__ == '__main__':
 
     img = cv2.imread(test_img_path)
     dst = copy.deepcopy(img)
-
-    # 计算CNN特征图
-    image = transform(img).unsqueeze(0).to(device)
-    feature_map = model.feature_map(image)
-    feature_map_w, feature_map_h = feature_map.shape[2:4]
-    # 标注边界框
-    bndboxs = util.parse_xml(test_xml_path)
     # 候选区域建议
     selectivesearch.config(gs, img, strategy='f')
     rects = selectivesearch.get_rects(gs)
     print('候选区域建议数目： %d' % len(rects))
+
+    # 计算CNN特征图
+    image = transform(img).unsqueeze(0).to(device)
+    ratio = image.shape[0] / img.shape[0]
+    feature_map = model.feature_map(image)
+    feature_map_w, feature_map_h = feature_map.shape[2:4]
+    # 标注边界框
+    bndboxs = util.parse_xml(test_xml_path)
 
     svm_thresh = 0.60
 
@@ -155,8 +155,9 @@ if __name__ == '__main__':
     score_list = list()
     positive_list = list()
 
+    start = time.time()
     for rect in rects:
-        project_rect = compute_project_window(rect, S=16)
+        project_rect = compute_project_window(rect, ratio, S=16)
         xmin, ymin, xmax, ymax = project_rect
         if xmin >= feature_map_w:
             xmin = feature_map_w - 1
@@ -180,13 +181,13 @@ if __name__ == '__main__':
                 positive_list.append(rect)
                 # cv2.rectangle(dst, (xmin, ymin), (xmax, ymax), color=(0, 0, 255), thickness=2)
                 print(rect, output, probs)
+    end = time.time()
+    print('detect time: %d s' % (end - start))
 
     nms_rects, nms_scores = nms(positive_list, score_list)
     print(nms_rects)
     print(nms_scores)
     draw_box_with_text(dst, nms_rects, nms_scores)
 
-    end = time.time()
-    print('detect time: %d s' % (end - start))
     cv2.imshow('img', dst)
     cv2.waitKey(0)
