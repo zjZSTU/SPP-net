@@ -12,7 +12,7 @@ matplotlib == 3.1.2
 # utils/data/pascal_voc.py: 11
 # utils/data/voc_car.py: 13
 # utils/util.py: 11
-numpy == 1.17.2
+numpy == 1.22.0
 
 # detector.py: 16
 # utils/data/create_finetune_data.py: 15
