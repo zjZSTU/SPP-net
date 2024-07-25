@@ -23,7 +23,7 @@ selectivesearch == 0.4
 # models/alexnet_spp.py: 10,11
 # models/spatial_pyramid_pooling.py: 11,12
 # utils/util.py: 13
-torch == 1.4.0
+torch == 2.2.0
 
 # classify/classifier.py: 17,18,19
 # detector.py: 15
